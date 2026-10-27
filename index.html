@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="OFFGRID, boutique streetwear : vêtements et accessoires au style urbain.">
+  <title>OFFGRID — Streetwear Store</title>
+  <style>
+    :root {--dark:#111;--lime:#d8ff35;--cream:#f5f3eb}
+    * {box-sizing:border-box}
+    body {margin:0;font-family:Arial,sans-serif;background:var(--cream);color:var(--dark)}
+    a {color:inherit;text-decoration:none}
+    button,select {font:inherit}
+    button {cursor:pointer}
+    button:focus-visible,a:focus-visible,select:focus-visible {outline:3px solid #466d00;outline-offset:3px}
+    header {background:#111;color:white;padding:18px 6%;display:flex;justify-content:space-between;align-items:center;gap:20px}
+    .logo {font-size:27px;font-weight:900;letter-spacing:-2px}
+    nav {display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    .cartbtn {background:var(--lime);border:0;padding:11px 16px;font-weight:bold}
+    .hero {background:#111;color:white;padding:95px 7% 100px}
+    .tag {color:var(--lime);font-weight:bold;letter-spacing:3px}
+    h1 {font-size:clamp(55px,10vw,140px);line-height:.9;letter-spacing:-5px;margin:20px 0}
+    .hero p {max-width:540px;font-size:19px;line-height:1.6}
+    .cta {display:inline-block;background:var(--lime);color:#111;padding:17px 25px;font-weight:bold;margin-top:22px}
+    .section {padding:65px 6%}
+    h2 {font-size:clamp(32px,5vw,55px);margin:0 0 24px}
+    .filters {display:flex;gap:10px;flex-wrap:wrap;margin-bottom:25px}
+    .filters button {border:1px solid #111;background:transparent;padding:11px 18px}
+    .filters button.active {background:#111;color:white}
+    .grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+    .product {background:white;overflow:hidden}
+    .visual {height:260px;display:grid;place-items:center;background:#e7e7df;font-size:85px}
+    .product:nth-child(2n) .visual {background:#ddd8cf}
+    .details {padding:22px}
+    .details h3 {margin:0 0 10px;font-size:21px}
+    .price {font-weight:900;font-size:22px}
+    .details select {width:100%;padding:12px;margin:12px 0;border:1px solid #aaa;background:white}
+    .add {width:100%;background:#111;color:white;border:0;padding:14px;font-weight:bold}
+    .add:hover {background:#333}
+    .about {background:var(--lime);padding:65px 6%}
+    .about p {max-width:650px;line-height:1.8}
+    .cart {position:fixed;right:0;top:0;width:min(420px,100%);height:100dvh;background:white;z-index:5;padding:25px;box-shadow:-10px 0 50px #0004;overflow:auto}
+    .cart[hidden],.overlay[hidden] {display:none}
+    .overlay {position:fixed;inset:0;background:#0009;z-index:4}
+    .carthead {display:flex;justify-content:space-between;align-items:center}
+    .close {border:0;background:#eee;padding:12px}
+    .cartitem {padding:15px 0;border-bottom:1px solid #ddd}
+    .remove {border:0;background:transparent;text-decoration:underline;margin-top:8px}
+    .checkout {width:100%;background:var(--lime);border:0;padding:17px;font-weight:bold;margin-top:20px}
+    footer {background:#111;color:white;padding:45px 6%;line-height:1.8}
+    footer a {text-decoration:underline}
+    @media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:540px){
+      header{flex-wrap:wrap}
+      nav{gap:12px;font-size:14px}
+      .grid{grid-template-columns:1fr}
+      .hero{padding:75px 6%}
+      h1{letter-spacing:-3px}
+      .visual{height:280px}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="logo" href="#">OFFGRID®</a>
+    <nav aria-label="Navigation principale">
+      <a href="#collection">Collection</a>
+      <a href="#about">Notre univers</a>
+      <button class="cartbtn" onclick="toggleCart(true)">
+        Panier (<span id="count">0</span>)
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="tag">NEW GENERATION STREETWEAR</div>
+      <h1>BREAK<br>THE RULES.</h1>
+      <p>Pas de limites. Pas de compromis.
+      OFFGRID incarne une nouvelle vision du streetwear.
+      Affirme ton style, à ta manière.</p>
+      <a class="cta" href="#collection">EXPLORER LA COLLECTION ↗</a>
+    </section>
+
+    <section class="section" id="collection">
+      <p class="tag" style="color:#444">OFFGRID / COLLECTION</p>
+      <h2>SHOP THE DROP.</h2>
+      <div class="filters" aria-label="Filtres produits">
+        <button class="active" onclick="filter('Tous',this)">Tous</button>
+        <button onclick="filter('Hauts',this)">Hauts</button>
+        <button onclick="filter('Bas',this)">Bas</button>
+        <button onclick="filter('Accessoires',this)">Accessoires</button>
+      </div>
+      <div id="products" class="grid"></div>
+    </section>
+
+    <section class="about" id="about">
+      <p>NOT JUST A BRAND. A MINDSET.</p>
+      <h2>BUILT DIFFERENT.</h2>
+      <p>OFFGRID célèbre la liberté, la créativité et l'individualité.
+      Une marque pour celles et ceux qui choisissent de suivre leur propre chemin.</p>
+    </section>
+  </main>
+
+  <div class="overlay" id="overlay" hidden onclick="toggleCart(false)"></div>
+  <aside class="cart" id="cart" hidden role="dialog" aria-modal="true" aria-label="Votre panier">
+    <div class="carthead">
+      <h2>TON PANIER</h2>
+      <button class="close" onclick="toggleCart(false)" aria-label="Fermer le panier">✕</button>
+    </div>
+    <div id="cartitems"></div>
+    <h3 id="total">Total : 0,00 €</h3>
+    <button class="checkout" onclick="alert('Paiement bientôt disponible. Les commandes sont désactivées pendant les tests.')">
+      PAIEMENT — BIENTÔT DISPONIBLE
+    </button>
+    <p>Version de démonstration : aucune commande ni aucun paiement n'est encore accepté.</p>
+  </aside>
+
+  <footer>
+    <div class="logo">OFFGRID®</div>
+    <p>Streetwear without limits.</p>
+    <p>© <span id="year"></span> OFFGRID. Tous droits réservés.</p>
+    <p>Site en préparation — catalogue et prix de démonstration.</p>
+  </footer>
+
+  <script>
+    const products = [
+      {id:1,name:"OFFGRID Essential Hoodie",price:59.90,category:"Hauts",icon:"🧥"},
+      {id:2,name:"OFFGRID Oversized Tee",price:29.90,category:"Hauts",icon:"👕"},
+      {id:3,name:"OFFGRID Cargo Pants",price:69.90,category:"Bas",icon:"👖"},
+      {id:4,name:"OFFGRID Urban Cap",price:24.90,category:"Accessoires",icon:"🧢"},
+      {id:5,name:"OFFGRID Signature Sweat",price:54.90,category:"Hauts",icon:"👕"},
+      {id:6,name:"OFFGRID Street Shorts",price:39.90,category:"Bas",icon:"🩳"}
+    ];
+    const basket = [];
+    const euro = n => n.toLocaleString("fr-FR",{style:"currency",currency:"EUR"});
+    function render(category="Tous"){
+      const selected = products.filter(p=>category==="Tous"||p.category===category);
+      document.getElementById("products").innerHTML=selected.map(p=>`
+        <article class="product">
+          <div class="visual" aria-label="Illustration de démonstration">${p.icon}</div>
+          <div class="details">
+            <h3>${p.name}</h3>
+            <div class="price">${euro(p.price)}</div>
+            <label for="size${p.id}">Taille</label>
+            <select id="size${p.id}">
+              ${p.category==="Accessoires"
+                ? '<option>Unique</option>'
+                : '<option>XS</option><option>S</option><option selected>M</option><option>L</option><option>XL</option>'}
+            </select>
+            <button class="add" onclick="add(${p.id})">AJOUTER AU PANIER +</button>
+          </div>
+        </article>`).join("");
+    }
+    function filter(category,button){
+      document.querySelectorAll(".filters button").forEach(b=>b.classList.remove("active"));
+      button.classList.add("active");
+      render(category);
+    }
+    function add(id){
+      const p=products.find(item=>item.id===id);
+      const size=document.getElementById("size"+id).value;
+      basket.push({...p,size});
+      updateCart();
+      toggleCart(true);
+    }
+    function removeItem(index){
+      basket.splice(index,1);
+      updateCart();
+    }
+    function updateCart(){
+      document.getElementById("count").textContent=basket.length;
+      document.getElementById("cartitems").innerHTML=basket.length
+        ?basket.map((p,i)=>`
+          <div class="cartitem">
+            <strong>${p.name}</strong><br>
+            Taille : ${p.size}<br>
+            ${euro(p.price)}<br>
+            <button class="remove" onclick="removeItem(${i})">Supprimer</button>
+          </div>`).join("")
+        :"<p>Ton panier est vide.</p>";
+      const total=basket.reduce((sum,p)=>sum+p.price,0);
+      document.getElementById("total").textContent="Total : "+euro(total);
+    }
+    function toggleCart(open){
+      document.getElementById("cart").hidden=!open;
+      document.getElementById("overlay").hidden=!open;
+      if(open)document.querySelector(".close").focus();
+      else document.querySelector(".cartbtn").focus();
+    }
+    document.addEventListener("keydown",e=>{
+      if(e.key==="Escape"&&!document.getElementById("cart").hidden)toggleCart(false);
+    });
+    document.getElementById("year").textContent=new Date().getFullYear();
+    render();
+    updateCart();
+  </script>
+</body>
+</html>
